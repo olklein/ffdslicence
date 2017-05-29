@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="LicenceScreen" >
+
+        <!--<PreferenceScreen-->
+            <!--android:icon="@android:drawable/ic_menu_crop"-->
+            <!--android:summary="Paramètres d'extraction vertical"-->
+            <!--android:title="Vertical" >-->
+            <!--<EditTextPreference-->
+                <!--android:defaultValue="0.614"-->
+                <!--android:key="Licence_vo"-->
+                <!--android:title="Offset vertical">-->
+            <!--</EditTextPreference>-->
+            <!--<EditTextPreference-->
+                <!--android:defaultValue="0.178"-->
+                <!--android:key="Licence_hauteur"-->
+                <!--android:title="Hauteur">-->
+            <!--</EditTextPreference>-->
+        <!--</PreferenceScreen>-->
+    <!--<PreferenceScreen-->
+        <!--android:icon="@android:drawable/ic_menu_crop"-->
+        <!--android:key="pdf_horizontal"-->
+        <!--android:summary="Paramètres d'extraction horizontal"-->
+        <!--android:title="Horizontal" >-->
+        <!--<EditTextPreference-->
+            <!--android:defaultValue="0.121"-->
+            <!--android:key="Licence_ho"-->
+            <!--android:title="Offset horizontal">-->
+        <!--</EditTextPreference>-->
+        <!--<EditTextPreference-->
+            <!--android:defaultValue="0.776"-->
+            <!--android:key="Licence_largeur"-->
+            <!--android:title="Largeur">-->
+        <!--</EditTextPreference>-->
+    <!--</PreferenceScreen>-->
+
+
+    <ListPreference
+        android:entries="@array/image_size_ratio"
+        android:defaultValue="0"
+        android:entryValues="@array/image_size_ratio_val"
+        android:key="image_ratio"
+        android:title="@string/settings_importation" />
+    <ListPreference
+        android:entries="@array/nombre_licences"
+        android:defaultValue="2"
+        android:entryValues="@array/nombre_licences_val"
+        android:key="nb_licences"
+        android:title="@string/settings_nb_licences" />
+
+</PreferenceScreen>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group>
+        <item android:title="@string/title_manage"
+            >
+            <menu>
+                <item
+                    android:id="@+id/nav_download"
+                    android:icon="@mipmap/ic_web_black_24dp"
+                    android:title="@string/FFDS" />
+                <item
+                    android:id="@+id/nav_manage"
+                    android:icon="@mipmap/ic_file_download_black_24dp"
+                    android:title="@string/action_importer" />
+                <item
+                    android:id="@+id/action_settings"
+                    android:icon="@drawable/ic_menu_manage"
+                    android:title="@string/action_settings" />
+
+            </menu>
+        </item>
+        <item android:title="@string/title_partager">
+            <menu>
+                <item
+                    android:id="@+id/nav_send"
+                    android:icon="@drawable/ic_menu_send"
+                    android:title="@string/action_send" />
+            </menu>
+        </item>
+    </group>
+
+</menu>

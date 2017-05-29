@@ -137,8 +137,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             openQuitDialog();
         }
     }
-
-
+    
     /**
      * A placeholder fragment containing a simple view.
      */

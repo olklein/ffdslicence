@@ -1,0 +1,24 @@
+<resources>
+
+    <string name="app_name">FFDS Licence</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Paramètres</string>
+    <string name="menu_close">Fermer</string>
+    <string name="button_confirm">Confirmer pour quitter?</string>
+    <string name="menu_cancel">Annuler</string>
+    <string name="menu_exit">Quitter</string>
+    <string name="settings_importation">Résolution d\'importation</string>
+    <string name="settings_nb_licences">Nombre de licences</string>
+    <string name="page_text">Importer la licence N°%1$d</string>
+    <string name="action_importer">Importer</string>
+    <string name="FFDS">FFDS</string>
+    <string name="title_partager">Partager</string>
+    <string name="action_send">Envoyer</string>
+    <string name="title_manage">Gérer</string>
+    <string name="licence_picture">Image de la licence</string>
+    <string name="logoPicture">Image du logo de l\'application</string>
+
+</resources>
