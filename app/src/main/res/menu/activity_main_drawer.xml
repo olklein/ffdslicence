@@ -9,11 +9,15 @@
                 <item
                     android:id="@+id/nav_download"
                     android:icon="@mipmap/ic_web_black_24dp"
-                    android:title="@string/FFDS" />
+                    android:title="@string/webFFDS" />
                 <item
                     android:id="@+id/nav_manage"
                     android:icon="@mipmap/ic_file_download_black_24dp"
                     android:title="@string/action_importer" />
+                <item
+                    android:id="@+id/import_wdsf"
+                    android:icon="@mipmap/ic_file_download_black_24dp"
+                    android:title="@string/action_importer_wdsf" />
                 <item
                     android:id="@+id/action_settings"
                     android:icon="@drawable/ic_menu_manage"

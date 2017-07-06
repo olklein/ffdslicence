@@ -44,6 +44,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itextpdf.text.DocumentException;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static int maxSize=2048;
     private static  int nbLicences;
     private static final int IMPORT_REQUEST   = 202;
+    private static final int IMPORT_WDSF_REQUEST   = 302;
     private static final int SETTINGS_REQUEST = 402;
 
 
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             openQuitDialog();
         }
     }
-    
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -227,8 +230,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_send) {
             Intent email = new Intent(Intent.ACTION_SEND);
             int page = (mViewPager.getCurrentItem()+1);
-            email.putExtra(Intent.EXTRA_SUBJECT, "FFDS Licence (" + page + ")");
-            email.putExtra(Intent.EXTRA_TEXT, "Ci-jointe ma licence FFDS.");
+            email.putExtra(Intent.EXTRA_SUBJECT, "FFD Licence (" + page + ")");
+            email.putExtra(Intent.EXTRA_TEXT, "Ci-jointe ma licence FFD.");
             email.setType("message/rfc822");
             LicenceURI = ReloadPage(getApplicationContext(),page);
             if (LicenceURI != null) {
@@ -248,6 +251,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent si = new Intent(this, SettingsActivity.class);
             //startActivity(si);
             startActivityForResult(si, SETTINGS_REQUEST);
+        } else if (id == R.id.import_wdsf) {
+            Intent si = new Intent(Intent.ACTION_GET_CONTENT);
+            si.setType("*/*");
+            startActivityForResult(si, IMPORT_WDSF_REQUEST);
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -273,8 +281,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     returnCursor.moveToFirst();
                     filename = returnCursor.getString(nameIndex);
                     returnCursor.close();
-                    LicenceURI = convert(this, is, filename, page);
+                    LicenceURI = convert(this, is, filename, page,false);
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                }
+
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor edit = settings.edit();
+                edit.putString("licence" + page, filename);
+                edit.putString("licence" + page + "Path", LicenceURI.getPath());
+                edit.apply();
+                recreate();
+            }
+        }
+        if (requestCode== IMPORT_WDSF_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Uri uri = data.getData();
+                InputStream is;
+                String filename = "";
+                int page = mViewPager.getCurrentItem() + 1;
+                try {
+                    is = getContentResolver().openInputStream(uri);
+                    Cursor returnCursor = getContentResolver().query(uri, null, null, null, null);
+                    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+
+                    returnCursor.moveToFirst();
+                    filename = returnCursor.getString(nameIndex);
+                    returnCursor.close();
+                    LicenceURI = convert(this, is, filename, page,true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (DocumentException e) {
                     e.printStackTrace();
                 }
 
@@ -305,9 +344,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static PdfRenderer.Page mCurrentPage;
 
 
-    private static Uri convert(Context context, InputStream asset, String filename, int page) throws IOException {
+    private static Uri convert(Context context, InputStream asset, String filename, int page, boolean isWDSF) throws IOException, DocumentException {
         if (!filename.contains(".pdf")) return null;
         File file = new File(context.getCacheDir(), filename);
+
+
         {
             // Since PdfRenderer cannot handle the compressed asset file directly, we copy it into
             // the cache directory.
@@ -321,10 +362,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             asset.close();
             output.close();
         }
-        ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        // This is the PdfRenderer we use to render the PDF.
-        mPdfRenderer = new PdfRenderer(mFileDescriptor);
-        return CreatePageImage(context,page);
+        File file2 = new File(context.getExternalFilesDir("/Download"), filename);
+        String outfilename= file2.getAbsolutePath().replace(".pdf","_extract.pdf");
+
+        if (!isWDSF){
+//            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+//            // This is the PdfRenderer we use to render the PDF.
+//            mPdfRenderer = new PdfRenderer(mFileDescriptor);
+//            clippdf.manipulateWDSFPdf(file.getAbsolutePath(), outfilename);
+
+            clippdf.manipulateFFDSPdf(file.getAbsolutePath(), outfilename);
+            File filein = new File(outfilename);
+            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(filein, ParcelFileDescriptor.MODE_READ_ONLY);
+            mPdfRenderer = new PdfRenderer(mFileDescriptor);
+            return CreatePageImageExtractFFDS(context,page);
+        }else {
+            clippdf.manipulateWDSFPdf(file.getAbsolutePath(), outfilename);
+            File filein = new File(outfilename);
+            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(filein, ParcelFileDescriptor.MODE_READ_ONLY);
+            // This is the PdfRenderer we use to render the PDF.
+            mPdfRenderer = new PdfRenderer(mFileDescriptor);
+            return CreatePageImageExtractWDSF(context, page);
+        }
     }
 
 
@@ -339,6 +398,146 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentPage = null;
         }
         mPdfRenderer.close();
+    }
+
+    private static Uri CreatePageImageWDSF(Context context, int page) {
+        if (mPdfRenderer == null) {
+            return null;
+        }
+        if (null != mCurrentPage) {
+            mCurrentPage.close();
+        }
+        mCurrentPage = mPdfRenderer.openPage(0);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+//        float wor = Float.parseFloat(settings.getString("Licence_wdsf_ho", "0.0585"));
+//        float hor = Float.parseFloat(settings.getString("Licence_wdsf_vo", "0.038"));
+//        float hr = Float.parseFloat(settings.getString("Licence_wdsf_hauteur","0.184"));
+//        float wr = Float.parseFloat(settings.getString("Licence_wdsf_largeur","0.784"));
+        float wor = Float.parseFloat(settings.getString("Licence_wdsf_ho", "0.058"));
+        float hor = Float.parseFloat(settings.getString("Licence_wdsf_vo", "0.037"));
+        float hr = Float.parseFloat(settings.getString("Licence_wdsf_hauteur","0.185"));
+        float wr = Float.parseFloat(settings.getString("Licence_wdsf_largeur","0.79"));
+        int ir = Integer.parseInt(settings.getString("image_ratio","0"));
+
+        int maxBitMapSize = 1024*ir;
+        if (ir==0){
+            if (maxSize>=2048) maxBitMapSize= 4096;
+            else if (maxSize>=1024) maxBitMapSize= 2048;
+        }
+
+        float ratioV = (float) Math.ceil(maxBitMapSize / mCurrentPage.getHeight());
+
+        float w;
+        float h = Math.min(maxBitMapSize,mCurrentPage.getHeight() * ratioV);
+        w = (float) (h/Math.sqrt(2));
+        Bitmap bitmap = createBitmap((int) w, (int) h, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(0xffFFFFFF);
+
+        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        closeRenderer();
+
+        String path = settings.getString("licence" + page + "Path", "______");
+        if (!path.equals("______")) {
+            Uri previousUri = Uri.parse("content://media" + path);
+            context.getContentResolver().delete(previousUri, null, null);
+        }
+        //
+        bitmap = createBitmap(bitmap, (int) (w * wor), (int) (h * hor), (int) (w * wr), (int) (h * hr));
+
+        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
+        return Uri.parse(path);
+    }
+
+
+    private static Uri CreatePageImageExtractWDSF(Context context, int page) {
+        if (mPdfRenderer == null) {
+            return null;
+        }
+        if (null != mCurrentPage) {
+            mCurrentPage.close();
+        }
+        mCurrentPage = mPdfRenderer.openPage(0);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        int ir = Integer.parseInt(settings.getString("image_ratio","0"));
+
+        int maxBitMapSize = 1024*ir;
+        if (ir==0){
+            if (maxSize>=2048) maxBitMapSize= 4096;
+            else if (maxSize>=1024) maxBitMapSize= 2048;
+        }
+
+        float w= maxBitMapSize;//Math.min(maxBitMapSize,mCurrentPage.getWidth() * ratioH);
+
+        float h;
+        h = (float) (w*(float)mCurrentPage.getHeight()/(float)mCurrentPage.getWidth());
+        Bitmap bitmap = createBitmap((int) w, (int) h, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(0xffFFFFFF);
+
+        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        closeRenderer();
+
+        String path = settings.getString("licence" + page + "Path", "______");
+        if (!path.equals("______")) {
+            Uri previousUri = Uri.parse("content://media" + path);
+            try {
+                context.getContentResolver().delete(previousUri, null, null);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
+        return Uri.parse(path);
+    }
+
+
+    private static Uri CreatePageImageExtractFFDS(Context context, int page) {
+        if (mPdfRenderer == null) {
+            return null;
+        }
+        if (null != mCurrentPage) {
+            mCurrentPage.close();
+        }
+        mCurrentPage = mPdfRenderer.openPage(0);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        int ir = Integer.parseInt(settings.getString("image_ratio","0"));
+
+        int maxBitMapSize = 1024*ir;
+        if (ir==0){
+            if (maxSize>=2048) maxBitMapSize= 4096;
+            else if (maxSize>=1024) maxBitMapSize= 2048;
+        }
+
+        float w= maxBitMapSize;//Math.min(maxBitMapSize,mCurrentPage.getWidth() * ratioH);
+
+        float h;
+        h = (float) (w*(float)mCurrentPage.getHeight()/(float)mCurrentPage.getWidth());
+        Bitmap bitmap = createBitmap((int) w, (int) h, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(0xffFFFFFF);
+
+        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        closeRenderer();
+
+        String path = settings.getString("licence" + page + "Path", "______");
+        if (!path.equals("______")) {
+            Uri previousUri = Uri.parse("content://media" + path);
+            try {
+                context.getContentResolver().delete(previousUri, null, null);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
+        return Uri.parse(path);
+    }
+    private static Uri ReloadPage(Context context, int page) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        String path = settings.getString("licence" + page + "Path", "______");
+        return Uri.parse("content://media" + path);
     }
 
     private static Uri CreatePageImage(Context context, int page) {
@@ -379,15 +578,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         //
         bitmap = createBitmap(bitmap, (int) (w * wor), (int) (h * hor), (int) (w * wr), (int) (h * hr));
-        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Licence FFDS"+page, "Licence"+page);
+        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Licence FFD"+page, "Licence"+page);
         return Uri.parse(path);
     }
 
-    private static Uri ReloadPage(Context context, int page) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String path = settings.getString("licence" + page + "Path", "______");
-        return Uri.parse("content://media" + path);
-    }
+
 
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager)

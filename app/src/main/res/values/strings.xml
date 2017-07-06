@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">FFDS Licence</string>
+    <string name="app_name">FFD Licence</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -14,11 +14,13 @@
     <string name="settings_nb_licences">Nombre de licences</string>
     <string name="page_text">Importer la licence N°%1$d</string>
     <string name="action_importer">Importer</string>
-    <string name="FFDS">FFDS</string>
+    <string name="FFDS">FFD</string>
     <string name="title_partager">Partager</string>
     <string name="action_send">Envoyer</string>
     <string name="title_manage">Gérer</string>
     <string name="licence_picture">Image de la licence</string>
     <string name="logoPicture">Image du logo de l\'application</string>
+    <string name="webFFDS">web FFD</string>
+    <string name="action_importer_wdsf">Importer WDSF</string>
 
 </resources>
