@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group>
         <item android:title="@string/title_manage"
@@ -11,18 +10,24 @@
                     android:icon="@mipmap/ic_web_black_24dp"
                     android:title="@string/webFFDS" />
                 <item
-                    android:id="@+id/nav_manage"
-                    android:icon="@mipmap/ic_file_download_black_24dp"
-                    android:title="@string/action_importer" />
-                <item
-                    android:id="@+id/import_wdsf"
-                    android:icon="@mipmap/ic_file_download_black_24dp"
-                    android:title="@string/action_importer_wdsf" />
-                <item
                     android:id="@+id/action_settings"
                     android:icon="@drawable/ic_menu_manage"
                     android:title="@string/action_settings" />
 
+            </menu>
+        </item>
+        <item android:title="@string/title_Importer"
+            android:icon="@mipmap/ic_file_download_black_24dp"
+            >
+            <menu>
+                <item
+                    android:id="@+id/nav_manage"
+                    android:icon="@android:drawable/ic_menu_add"
+                    android:title="@string/action_importer" />
+                <item
+                    android:id="@+id/import_wdsf"
+                    android:icon="@android:drawable/ic_menu_add"
+                    android:title="@string/action_importer_wdsf" />
             </menu>
         </item>
         <item android:title="@string/title_partager">
@@ -31,6 +36,14 @@
                     android:id="@+id/nav_send"
                     android:icon="@drawable/ic_menu_send"
                     android:title="@string/action_send" />
+            </menu>
+        </item>
+        <item android:title="@string/title_About">
+            <menu>
+                <item
+                    android:id="@+id/nav_Licence_Logiciel"
+                    android:icon="@mipmap/ic_info_black_24dp"
+                    android:title="@string/action_Licence_Logiciel" />
             </menu>
         </item>
     </group>

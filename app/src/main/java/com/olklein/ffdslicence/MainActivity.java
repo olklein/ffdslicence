@@ -3,43 +3,40 @@ package com.olklein.ffdslicence;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.pdf.PdfRenderer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +49,35 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static android.graphics.Bitmap.createBitmap;
+
+/**
+ * Created by olklein on 06/07/2017.
+ *
+ *
+ *    This program is free software: you can redistribute it and/or  modify
+ *    it under the terms of the GNU Affero General Public License, version 3,
+ *    as published by the Free Software Foundation.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Affero General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Affero General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *    As a special exception, the copyright holders give permission to link the
+ *    code of portions of this program with the OpenSSL library under certain
+ *    conditions as described in each individual source file and distribute
+ *    linked combinations including the program with the OpenSSL library. You
+ *    must comply with the GNU Affero General Public License in all respects
+ *    for all of the code used other than as permitted herein. If you modify
+ *    file(s) with this exception, you may extend this exception to your
+ *    version of the file(s), but you are not obligated to do so. If you do not
+ *    wish to do so, delete this exception statement from your version. If you
+ *    delete this exception statement from all source files in the program,
+ *    then also delete it in the license file.
+ */
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -91,26 +117,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        FloatingActionButton fabImport = (FloatingActionButton) findViewById(R.id.fabImport);
-        fabImport.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                {
-                    Intent si = new Intent(Intent.ACTION_GET_CONTENT);
-                    si.setType("*/*");
-                    startActivityForResult(si, IMPORT_REQUEST);
-                }
-            }
-        });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -203,17 +214,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public int getCount() {
-            // Show 2 total pages.
+            // Show total pages.
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             String nbLicencesString = settings.getString("nb_licences","2");
             nbLicences = Integer.parseInt(nbLicencesString);
             return nbLicences;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return "SECTION "+ position;
-
         }
     }
 
@@ -221,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Resources resource = getApplicationContext().getResources();
 
         if (id == R.id.nav_manage) {
             Intent si = new Intent(Intent.ACTION_GET_CONTENT);
@@ -230,17 +236,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_send) {
             Intent email = new Intent(Intent.ACTION_SEND);
             int page = (mViewPager.getCurrentItem()+1);
-            email.putExtra(Intent.EXTRA_SUBJECT, "FFD Licence (" + page + ")");
-            email.putExtra(Intent.EXTRA_TEXT, "Ci-jointe ma licence FFD.");
+            email.putExtra(Intent.EXTRA_SUBJECT, resource.getString(R.string.mail_subjet,page));
+            email.putExtra(Intent.EXTRA_TEXT, resource.getString(R.string.mail_text));
             email.setType("message/rfc822");
             LicenceURI = ReloadPage(getApplicationContext(),page);
             if (LicenceURI != null) {
                 email.putExtra(Intent.EXTRA_STREAM, LicenceURI);
             }
-            startActivity(Intent.createChooser(email, "Envoyer"));
+            startActivity(Intent.createChooser(email, resource.getString(R.string.Send)));
         }else if(id == R.id.nav_download){
             if (!isNetworkAvailable()){
-                Toast toast = Toast.makeText(getApplicationContext(), "Pas de connexion réseau.\nVérifiez l\'état de votre connexion au réseau et réessayer.", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(getApplicationContext(), resource.getString(R.string.No_network), Toast.LENGTH_LONG);
                 toast.show();
             }else {
                 Intent webIntent = new Intent(this, FFDSWeb.class);
@@ -249,15 +255,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }if (id == R.id.action_settings) {
             Intent si = new Intent(this, SettingsActivity.class);
-            //startActivity(si);
+
             startActivityForResult(si, SETTINGS_REQUEST);
         } else if (id == R.id.import_wdsf) {
             Intent si = new Intent(Intent.ACTION_GET_CONTENT);
             si.setType("*/*");
             startActivityForResult(si, IMPORT_WDSF_REQUEST);
+        }else if (id == R.id.nav_Licence_Logiciel) {
+            AlertDialog.Builder quitDialog = new AlertDialog.Builder(this);
+            quitDialog.setTitle(R.string.action_Licence_Logiciel);
+            quitDialog.setMessage(R.string.action_Licence_Logiciel_Info);
+
+            quitDialog.setPositiveButton(R.string.OK, new android.content.DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                }
+            });
+            quitDialog.setIcon(R.mipmap.ic_launcher_round);
+            quitDialog.show();
+
+
+
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -282,9 +302,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     filename = returnCursor.getString(nameIndex);
                     returnCursor.close();
                     LicenceURI = convert(this, is, filename, page,false);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (DocumentException e) {
+                } catch (IOException | DocumentException e) {
                     e.printStackTrace();
                 }
 
@@ -311,9 +329,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     filename = returnCursor.getString(nameIndex);
                     returnCursor.close();
                     LicenceURI = convert(this, is, filename, page,true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (DocumentException e) {
+                } catch (IOException | DocumentException e) {
                     e.printStackTrace();
                 }
 
@@ -348,8 +364,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!filename.contains(".pdf")) return null;
         File file = new File(context.getCacheDir(), filename);
 
-
-        {
             // Since PdfRenderer cannot handle the compressed asset file directly, we copy it into
             // the cache directory.
             FileOutputStream output = new FileOutputStream(file);
@@ -361,29 +375,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             asset.close();
             output.close();
-        }
-        File file2 = new File(context.getExternalFilesDir("/Download"), filename);
-        String outfilename= file2.getAbsolutePath().replace(".pdf","_extract.pdf");
 
-        if (!isWDSF){
+        File file2 = new File(context.getExternalFilesDir("/Download"), filename);
+        String outputFileName= file2.getAbsolutePath().replace(".pdf","_extract.pdf");
+
+        clipPDF.clip(file.getAbsolutePath(), outputFileName,isWDSF);
+        File fileIn = new File(outputFileName);
+        ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(fileIn, ParcelFileDescriptor.MODE_READ_ONLY);
+        mPdfRenderer = new PdfRenderer(mFileDescriptor);
+        return CreatePageImageExtract(context, page,isWDSF);
+
+//        if (!isWDSF){
+//            // Without iText
 //            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
 //            // This is the PdfRenderer we use to render the PDF.
 //            mPdfRenderer = new PdfRenderer(mFileDescriptor);
-//            clippdf.manipulateWDSFPdf(file.getAbsolutePath(), outfilename);
-
-            clippdf.manipulateFFDSPdf(file.getAbsolutePath(), outfilename);
-            File filein = new File(outfilename);
-            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(filein, ParcelFileDescriptor.MODE_READ_ONLY);
-            mPdfRenderer = new PdfRenderer(mFileDescriptor);
-            return CreatePageImageExtractFFDS(context,page);
-        }else {
-            clippdf.manipulateWDSFPdf(file.getAbsolutePath(), outfilename);
-            File filein = new File(outfilename);
-            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(filein, ParcelFileDescriptor.MODE_READ_ONLY);
-            // This is the PdfRenderer we use to render the PDF.
-            mPdfRenderer = new PdfRenderer(mFileDescriptor);
-            return CreatePageImageExtractWDSF(context, page);
-        }
+//            return CreatePageImage(context,page);
+//        }else {
+//            // Without iText
+//            ParcelFileDescriptor mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+//            // This is the PdfRenderer we use to render the PDF.
+//            mPdfRenderer = new PdfRenderer(mFileDescriptor);
+//            return CreatePageImageWDSF(context,page);
+//        }
     }
 
 
@@ -410,10 +424,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mCurrentPage = mPdfRenderer.openPage(0);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-//        float wor = Float.parseFloat(settings.getString("Licence_wdsf_ho", "0.0585"));
-//        float hor = Float.parseFloat(settings.getString("Licence_wdsf_vo", "0.038"));
-//        float hr = Float.parseFloat(settings.getString("Licence_wdsf_hauteur","0.184"));
-//        float wr = Float.parseFloat(settings.getString("Licence_wdsf_largeur","0.784"));
         float wor = Float.parseFloat(settings.getString("Licence_wdsf_ho", "0.058"));
         float hor = Float.parseFloat(settings.getString("Licence_wdsf_vo", "0.037"));
         float hr = Float.parseFloat(settings.getString("Licence_wdsf_hauteur","0.185"));
@@ -450,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    private static Uri CreatePageImageExtractWDSF(Context context, int page) {
+    private static Uri CreatePageImageExtract(Context context, int page, boolean isWDSF) {
         if (mPdfRenderer == null) {
             return null;
         }
@@ -468,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (maxSize>=1024) maxBitMapSize= 2048;
         }
 
-        float w= maxBitMapSize;//Math.min(maxBitMapSize,mCurrentPage.getWidth() * ratioH);
+        float w= maxBitMapSize;
 
         float h;
         h = (float) (w*(float)mCurrentPage.getHeight()/(float)mCurrentPage.getWidth());
@@ -488,52 +498,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
+        if (isWDSF){
+            path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
+        }else{
+            path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Licence FFD"+page, "Licence"+page);
+        }
         return Uri.parse(path);
     }
 
-
-    private static Uri CreatePageImageExtractFFDS(Context context, int page) {
-        if (mPdfRenderer == null) {
-            return null;
-        }
-        if (null != mCurrentPage) {
-            mCurrentPage.close();
-        }
-        mCurrentPage = mPdfRenderer.openPage(0);
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        int ir = Integer.parseInt(settings.getString("image_ratio","0"));
-
-        int maxBitMapSize = 1024*ir;
-        if (ir==0){
-            if (maxSize>=2048) maxBitMapSize= 4096;
-            else if (maxSize>=1024) maxBitMapSize= 2048;
-        }
-
-        float w= maxBitMapSize;//Math.min(maxBitMapSize,mCurrentPage.getWidth() * ratioH);
-
-        float h;
-        h = (float) (w*(float)mCurrentPage.getHeight()/(float)mCurrentPage.getWidth());
-        Bitmap bitmap = createBitmap((int) w, (int) h, Bitmap.Config.ARGB_8888);
-        bitmap.eraseColor(0xffFFFFFF);
-
-        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-        closeRenderer();
-
-        String path = settings.getString("licence" + page + "Path", "______");
-        if (!path.equals("______")) {
-            Uri previousUri = Uri.parse("content://media" + path);
-            try {
-                context.getContentResolver().delete(previousUri, null, null);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-
-        path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "WDSF IDCard"+page, "licence"+page);
-        return Uri.parse(path);
-    }
     private static Uri ReloadPage(Context context, int page) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String path = settings.getString("licence" + page + "Path", "______");
@@ -581,8 +553,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Licence FFD"+page, "Licence"+page);
         return Uri.parse(path);
     }
-
-
 
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager)

@@ -35,12 +35,12 @@
     <!--</PreferenceScreen>-->
 
 
-    <ListPreference
-        android:entries="@array/image_size_ratio"
-        android:defaultValue="0"
-        android:entryValues="@array/image_size_ratio_val"
-        android:key="image_ratio"
-        android:title="@string/settings_importation" />
+    <!--<ListPreference-->
+        <!--android:entries="@array/image_size_ratio"-->
+        <!--android:defaultValue="0"-->
+        <!--android:entryValues="@array/image_size_ratio_val"-->
+        <!--android:key="image_ratio"-->
+        <!--android:title="@string/settings_importation" />-->
     <ListPreference
         android:entries="@array/nombre_licences"
         android:defaultValue="2"

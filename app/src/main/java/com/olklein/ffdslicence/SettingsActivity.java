@@ -41,7 +41,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 		// Prepare data intent 
 		Intent data = new Intent();
 		data.putExtra("returnKey1", "Done");
-		//MainActivity.mViewPager.getAdapter().notifyDataSetChanged();
 
 		// Activity finished ok, return the data
 		setResult(RESULT_OK, data);
@@ -66,6 +65,4 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 					return false;
 			}
 		}
-
-
 	}

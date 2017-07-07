@@ -13,7 +13,7 @@
     <string name="settings_importation">Résolution d\'importation</string>
     <string name="settings_nb_licences">Nombre de licences</string>
     <string name="page_text">Importer la licence N°%1$d</string>
-    <string name="action_importer">Importer</string>
+    <string name="action_importer">Licence FFDS</string>
     <string name="FFDS">FFD</string>
     <string name="title_partager">Partager</string>
     <string name="action_send">Envoyer</string>
@@ -21,6 +21,16 @@
     <string name="licence_picture">Image de la licence</string>
     <string name="logoPicture">Image du logo de l\'application</string>
     <string name="webFFDS">web FFD</string>
-    <string name="action_importer_wdsf">Importer WDSF</string>
+    <string name="action_importer_wdsf">WDSF ID Card </string>
+    <string name="title_Importer">Importer</string>
+    <string name="No_network">Pas de connexion réseau. &#13; Vérifiez l\'état de votre connexion au réseau et réessayer.</string>
+    <string name="mail_subjet">Licence (&#160;%1$d&#160;)</string>
+    <string name="mail_text">Ci-jointe ma licence.</string>
+    <string name="Send">Envoyer</string>
+    <string name="title_information">Information</string>
+    <string name="title_About">A propos</string>
+    <string name="action_Licence_Logiciel">Licence logiciel</string>
+    <string name="OK">OK</string>
+    <string name="action_Licence_Logiciel_Info">Le code source de cette application est disponible sous licence AGPL à l\'adresse suivante: &#13; https://github.com/olklein/ffdslicence.</string>
 
 </resources>

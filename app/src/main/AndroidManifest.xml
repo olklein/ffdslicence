@@ -22,25 +22,17 @@
             android:name="com.olklein.ffdslicence.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
         </activity>
-        <activity android:name="com.olklein.ffdslicence.SettingsActivity" ></activity>
-        <activity android:name="com.olklein.ffdslicence.FFDSWeb" ></activity>
+        <activity android:name="com.olklein.ffdslicence.SettingsActivity" />
+        <activity android:name="com.olklein.ffdslicence.FFDSWeb" />
         <activity
             android:name="com.olklein.ffdslicence.SplashActivity"
             android:theme="@style/SplashTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
     </application>
 
 </manifest>
